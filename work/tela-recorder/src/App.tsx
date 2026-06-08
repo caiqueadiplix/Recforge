@@ -61,6 +61,7 @@ type EditorVideo = {
 
 type RecordingState = "idle" | "recording" | "paused";
 type AppTab = "library" | "record" | "editor" | "settings";
+type OutputFormat = "webm" | "mp4";
 type ShortcutConfig = {
   startStop: string;
   pause: string;
@@ -111,7 +112,7 @@ function App() {
   const [editorEnd, setEditorEnd] = useState(10);
   const [editorDuration, setEditorDuration] = useState(0);
   const [shortcuts, setShortcuts] = useState<ShortcutConfig>(() => loadShortcuts());
-  const [autoConvertMp4, setAutoConvertMp4] = useState(() => localStorage.getItem("tela-recorder-auto-mp4") === "true");
+  const [outputFormat, setOutputFormat] = useState<OutputFormat>(() => loadOutputFormat());
 
   const previewRef = useRef<HTMLVideoElement | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -148,8 +149,8 @@ function App() {
   }, [shortcuts]);
 
   useEffect(() => {
-    localStorage.setItem("tela-recorder-auto-mp4", String(autoConvertMp4));
-  }, [autoConvertMp4]);
+    localStorage.setItem("tela-recorder-output-format", outputFormat);
+  }, [outputFormat]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -334,9 +335,9 @@ function App() {
       await recorderInvoke("overlay_hide");
       setRecordingState("idle");
       setRecentRecordings((items) => [result.outputPath, ...items].slice(0, 5));
-      if (autoConvertMp4) {
-        setMessage("Gravacao salva. Convertendo para MP4...");
-        const mp4 = await recorderInvoke<EditorVideo>("convert_to_mp4", { path: result.outputPath });
+      if (outputFormat === "mp4") {
+        setMessage("Gravacao salva. Gerando MP4 em alta qualidade...");
+        const mp4 = await recorderInvoke<EditorVideo>("convert_to_mp4", { path: result.outputPath, quality });
         setRecentRecordings((items) => [mp4.path, ...items].slice(0, 5));
         setMessage(`MP4 exportado (${formatBytes(mp4.size)}): ${mp4.path}`);
       } else {
@@ -469,7 +470,7 @@ function App() {
     setIsBusy(true);
     try {
       setMessage(`Convertendo para MP4: ${video.name}`);
-      const converted = await recorderInvoke<EditorVideo>("convert_to_mp4", { path: video.path });
+      const converted = await recorderInvoke<EditorVideo>("convert_to_mp4", { path: video.path, quality });
       await refreshRecordings();
       setMessage(`MP4 pronto (${formatBytes(converted.size)}): ${converted.path}`);
     } catch (error) {
@@ -686,18 +687,17 @@ function App() {
               ))}
             </div>
             <select value={quality} onChange={(event) => setQuality(event.target.value)}>
-              <option value="high">Alta qualidade</option>
-              <option value="balanced">Equilibrado</option>
+              <option value="high">Upload premium</option>
+              <option value="balanced">Alta qualidade</option>
               <option value="small">Arquivo menor</option>
             </select>
-            <label className="toggle-row">
-              <input
-                type="checkbox"
-                checked={autoConvertMp4}
-                onChange={(event) => setAutoConvertMp4(event.target.checked)}
-              />
-              Converter para MP4 ao parar
-            </label>
+            <div className="segmented">
+              {(["mp4", "webm"] as OutputFormat[]).map((format) => (
+                <button key={format} className={outputFormat === format ? "active" : ""} onClick={() => setOutputFormat(format)}>
+                  {format.toUpperCase()}
+                </button>
+              ))}
+            </div>
           </section>
 
           <section className="panel-block">
@@ -965,9 +965,17 @@ function bestMimeType() {
 }
 
 function qualityBitrate(quality: string) {
-  if (quality === "high") return 12_000_000;
-  if (quality === "small") return 4_000_000;
-  return 8_000_000;
+  if (quality === "high") return 45_000_000;
+  if (quality === "small") return 12_000_000;
+  return 28_000_000;
+}
+
+function loadOutputFormat(): OutputFormat {
+  const saved = localStorage.getItem("tela-recorder-output-format");
+  if (saved === "webm" || saved === "mp4") {
+    return saved;
+  }
+  return localStorage.getItem("tela-recorder-auto-mp4") === "false" ? "webm" : "mp4";
 }
 
 function loadShortcuts(): ShortcutConfig {
@@ -1062,9 +1070,9 @@ function AudioMeter({ label, value }: { label: string; value: number }) {
 }
 
 function qualityLabel(value: string) {
-  if (value === "high") return "Alta";
+  if (value === "high") return "Premium";
   if (value === "small") return "Compacta";
-  return "Equilibrada";
+  return "Alta";
 }
 
 export default App;

@@ -318,6 +318,7 @@ function renameRecording(payload) {
 
 function convertToMp4(payload) {
   const inputPath = payload?.path;
+  const quality = payload?.quality || "balanced";
   if (!inputPath || !fs.existsSync(inputPath)) {
     throw new Error("Arquivo nao encontrado para converter.");
   }
@@ -333,18 +334,7 @@ function convertToMp4(payload) {
     "-hide_banner",
     "-i",
     inputPath,
-    "-c:v",
-    "libx264",
-    "-preset",
-    "veryfast",
-    "-crf",
-    "20",
-    "-c:a",
-    "aac",
-    "-b:a",
-    "192k",
-    "-movflags",
-    "+faststart",
+    ...mp4EncodingArgs(quality),
     outputPath,
   ];
 
@@ -357,6 +347,33 @@ function convertToMp4(payload) {
       resolve(videoFromPath(outputPath));
     });
   });
+}
+
+function mp4EncodingArgs(quality) {
+  const profile = {
+    high: { crf: "16", preset: "slow", audio: "320k" },
+    small: { crf: "23", preset: "medium", audio: "192k" },
+    balanced: { crf: "18", preset: "medium", audio: "320k" },
+  }[quality] || { crf: "18", preset: "medium", audio: "320k" };
+
+  return [
+    "-c:v",
+    "libx264",
+    "-preset",
+    profile.preset,
+    "-crf",
+    profile.crf,
+    "-pix_fmt",
+    "yuv420p",
+    "-profile:v",
+    "high",
+    "-c:a",
+    "aac",
+    "-b:a",
+    profile.audio,
+    "-movflags",
+    "+faststart",
+  ];
 }
 
 function exportTrim(payload) {
@@ -599,6 +616,11 @@ function mappingArgs(audioInputCount) {
 }
 
 function encodingArgs(quality) {
-  const crf = quality === "high" ? "18" : quality === "small" ? "28" : "23";
-  return ["-c:v", "libx264", "-preset", "veryfast", "-crf", crf, "-pix_fmt", "yuv420p"];
+  const profile = {
+    high: { crf: "16", preset: "slow" },
+    small: { crf: "26", preset: "veryfast" },
+    balanced: { crf: "20", preset: "medium" },
+  }[quality] || { crf: "20", preset: "medium" };
+
+  return ["-c:v", "libx264", "-preset", profile.preset, "-crf", profile.crf, "-pix_fmt", "yuv420p"];
 }

@@ -56,13 +56,14 @@ test-output\smoke-start-stop.mp4
 - Lista microfones reais do Electron/Chromium e grava pelo `deviceId` selecionado.
 - Teste de microfone com medidor de nivel dentro do app.
 - Overlay pequeno com pausar, mutar microfone e encerrar. Ele usa `setContentProtection(true)` para tentar ficar fora da captura no Windows.
-- Salvamento em `.webm`, que e mais leve para gravacao fluida em tempo real.
+- Saida em `.mp4` ou `.webm`. O app grava o bruto fluido em WebM e, quando MP4 esta selecionado, gera H.264/AAC com `faststart` para upload.
+- Perfil `Upload premium` com bitrate alto na captura e CRF mais baixo no MP4 para reduzir perda quando outra plataforma recomprime o video.
 - Saida padrao em `Videos\Tela Recorder`.
 - Aba Editor com importacao de video, preview, corte por inicio/fim e exportacao via FFmpeg.
 - Navegacao visual estilo studio premium, com sidebar, biblioteca/editor/configuracoes e tema escuro com acento salmao.
 - Configuracao de hotkeys globais dentro da aba Hotkeys.
 - Biblioteca real lendo `Videos\Tela Recorder`, com cards, abrir no editor, renomear, excluir e converter para MP4.
-- Opcao de converter automaticamente para MP4 ao encerrar a gravacao.
+- Escolha de formato de saida direto na tela de gravacao: MP4 para compatibilidade/upload, WebM para arquivo bruto mais leve.
 
 O caminho antigo de FFmpeg `gdigrab` ainda existe no backend como fallback/teste, mas ele e mais pesado e pode capturar o desktop virtual inteiro em computadores com varios monitores.
 
