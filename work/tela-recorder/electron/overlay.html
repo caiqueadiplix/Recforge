@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        height: 100vh;
+        display: grid;
+        place-items: center;
+        background: transparent;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        -webkit-app-region: drag;
+      }
+
+      .bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 10px;
+        background: rgba(12, 17, 24, 0.9);
+        box-shadow: 0 14px 36px rgba(0, 0, 0, 0.35);
+      }
+
+      button {
+        width: 42px;
+        height: 38px;
+        border: 0;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        color: #f4f8ff;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 800;
+        -webkit-app-region: no-drag;
+      }
+
+      button.stop {
+        background: #e83e55;
+      }
+
+      button:hover {
+        filter: brightness(1.12);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bar">
+      <button title="Pausar/retomar" data-command="pause">Ⅱ</button>
+      <button title="Mutar/desmutar microfone" data-command="mute">Mic</button>
+      <button class="stop" title="Encerrar e salvar" data-command="stop">■</button>
+    </div>
+    <script>
+      document.querySelectorAll("button").forEach((button) => {
+        button.addEventListener("click", () => {
+          window.recorder.invoke("overlay_command", {
+            command: button.dataset.command,
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

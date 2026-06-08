@@ -1,0 +1,15 @@
+node_modules/
+dist/
+target/
+test-output/
+*.log
+*.tmp
+*.mp4
+*.webm
+*.mov
+*.mkv
+
+work/tela-recorder/node_modules/
+work/tela-recorder/dist/
+work/tela-recorder/src-tauri/target/
+work/tela-recorder/test-output/
