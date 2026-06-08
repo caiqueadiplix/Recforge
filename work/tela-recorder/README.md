@@ -1,6 +1,8 @@
-# Tela Recorder
+# RecForge
 
-Gravador de tela Windows-first com interface React e backend desktop.
+Premium Windows screen recorder with smooth capture, microphone control, overlay commands, video library, and built-in editing tools.
+
+RecForge is a Windows-first desktop app built for fluid screen/window capture, fast recording controls, clean overlays, microphone management, video organization, and lightweight editing in one focused workflow.
 
 ## Rodar agora
 
